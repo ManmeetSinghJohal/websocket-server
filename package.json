@@ -1,0 +1,25 @@
+{
+  "name": "websocket-server-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.7.0",
+    "uuid": "^10.0.0",
+    "uuid4": "^2.0.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.3.0",
+    "@types/node-fetch": "^2.6.11",
+    "@types/uuid4": "^2.0.3",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.5.4"
+  }
+}
