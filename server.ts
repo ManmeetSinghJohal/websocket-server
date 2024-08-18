@@ -21,6 +21,7 @@ const ENDPOINTS = [
   "https://data--ap-southeast.upscope.io/status?stats=1",
 ];
 
+const MAX_CONNECTIONS = 30; // Define the maximum number of connections allowed
 const connections: { [key: string]: WebSocket } = {};
 
 async function fetchData(): Promise<EndpointData[]> {
@@ -76,6 +77,12 @@ const handleClose = (uuid: string) => {
 };
 
 wss.on("connection", (connection, request) => {
+  if (Object.keys(connections).length >= MAX_CONNECTIONS) {
+    console.log("Connection limit reached. Closing new connection.");
+    connection.close(); // Reject the connection if limit is reached
+    return;
+  }
+
   console.log("client connected");
   const uuid = uuid4();
   console.log(`client uuid: ${uuid}`);
