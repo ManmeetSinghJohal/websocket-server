@@ -1,11 +1,16 @@
 import http from "http";
-import { WebSocket} from "ws"; 
+import { WebSocket } from "ws";
 import uuid4 from "uuid4";
 import fetch from "node-fetch";
 
+import { EndpointData } from "./types/types";
+
 const server = http.createServer();
-const wss = new WebSocket.Server({ server }); 
+const wss = new WebSocket.Server({ server });
 const port = process.env.PORT || 8000;
+
+// Initialize cachedData with the correct type
+let cachedData: EndpointData[] = [];
 
 const ENDPOINTS = [
   "https://data--us-east.upscope.io/status?stats=1",
@@ -18,7 +23,7 @@ const ENDPOINTS = [
 
 const connections: { [key: string]: WebSocket } = {};
 
-async function fetchData() {
+async function fetchData(): Promise<EndpointData[]> {
   try {
     const fetchPromises = ENDPOINTS.map(async (url) => {
       const response = await fetch(url);
@@ -40,19 +45,28 @@ async function fetchData() {
   }
 }
 
+async function updateData() {
+  try {
+    cachedData = await fetchData();
+  } catch (error) {
+    console.error("Failed to fetch data, using last known good data.");
+    // Optionally, notify clients of the error
+  }
+}
+
 const broadcast = () => {
-  Object.keys(connections).forEach(async (uuid) => {
+  const message = JSON.stringify(cachedData);
+  Object.keys(connections).forEach((uuid) => {
     const connection = connections[uuid];
-    const data = await fetchData();
-    const message = JSON.stringify(data);
     connection.send(message);
   });
 };
 
 const INTERVAL = 20000; // 20 seconds
 
-setInterval(() => {
+setInterval(async () => {
   console.log("Fetching and broadcasting data...");
+  await updateData();
   broadcast();
 }, INTERVAL);
 
