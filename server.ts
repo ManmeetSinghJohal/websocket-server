@@ -56,12 +56,15 @@ async function updateData() {
 }
 
 const broadcast = () => {
+  console.log("inside broadcast");
   const message = JSON.stringify(cachedData);
   Object.keys(connections).forEach((uuid) => {
     const connection = connections[uuid];
     connection.send(message);
   });
 };
+
+updateData();
 
 const INTERVAL = 20000; // 20 seconds
 
@@ -77,18 +80,26 @@ const handleClose = (uuid: string) => {
 };
 
 wss.on("connection", (connection, request) => {
-  if (Object.keys(connections).length >= MAX_CONNECTIONS) {
-    console.log("Connection limit reached. Closing new connection.");
-    connection.close(); // Reject the connection if limit is reached
-    return;
-  }
-
+  // if (Object.keys(connections).length >= MAX_CONNECTIONS) {
+  //   console.log("Connection limit reached. Closing new connection.");
+  //   connection.close(); // Reject the connection if limit is reached
+  //   return;
+  // }
+  
   console.log("client connected");
   const uuid = uuid4();
   console.log(`client uuid: ${uuid}`);
-
+  
   connections[uuid] = connection;
 
+  connection.send(JSON.stringify(cachedData));
+
+
+
+  // if(cachedData.length > 1){
+  //   broadcast();
+  // }
+  
   connection.on("close", () => {
     handleClose(uuid);
   });
